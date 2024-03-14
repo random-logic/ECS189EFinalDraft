@@ -23,9 +23,9 @@ class LogoutViewModel: ObservableObject {
 // Define a ViewModel to handle create account logic and data
 class CreateAccountViewModel: ObservableObject {
     // Handles all the concurrency for you
-    func createAccount(username: String, password: String, callback: @escaping (User?, String?) -> Void) {
+    func createAccount(username: String, password: String, name: String, student_id: String, callback: @escaping (UserModel?, String?) -> Void) {
         Task {
-            let (user, error) = await AuthApi.shared.createAccount(username: username, password: password)
+            let (user, error) = await AuthApi.shared.createAccount(username: username, password: password, name: name, role: "student", student_id: student_id, department: nil)
             await MainActor.run {
                 callback(user, error)
             }

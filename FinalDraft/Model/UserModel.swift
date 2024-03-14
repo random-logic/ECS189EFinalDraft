@@ -23,13 +23,14 @@ struct UserModel : DictionaryConvertible {
         self.name = name
         self.role = role
         
-        if role == "Student" {
-            guard let student_id = documentData["student_id"] as? String,
-                let major = (documentData["majors"] as? NSArray)?.compactMap({ $0 as? String }),
-                let applied = (documentData["applied"] as? NSArray)?.compactMap({ $0 as? String }),
-                let saved = (documentData["saved"] as? NSArray)?.compactMap({ $0 as? String }) else {
+        if role == "student" {
+            guard let student_id = documentData["student_id"] as? String else {
                 return nil
             }
+            
+            let major = (documentData["majors"] as? NSArray)?.compactMap({ $0 as? String }) ?? []
+            let applied = (documentData["applied"] as? NSArray)?.compactMap({ $0 as? String }) ?? []
+            let saved = (documentData["saved"] as? NSArray)?.compactMap({ $0 as? String }) ?? []
             
             self.student_id = student_id
             self.major = major
@@ -37,7 +38,7 @@ struct UserModel : DictionaryConvertible {
             self.saved = saved
             self.postings = []
         }
-        else if role == "Professor" {
+        else if role == "professor" {
             guard let department = documentData["department"] as? String ,
                   let postings = (documentData["postings"] as? NSArray)?.compactMap({ $0 as? String }) else {
                 return nil

@@ -8,14 +8,14 @@ class AuthApi {
     ///   - username: The email address for the user's account.
     ///   - password: The password for the user's account.
     /// - Returns: A tuple containing the newly created `User` object upon success, or an error message upon failure.
-    func createAccount(username: String, password: String) async -> (User?, String?) {
+    func createAccount(username: String, password: String, name: String, major: [String] = [], role: String, student_id: String?, department: String?) async -> (UserModel?, String?) {
         do {
             // Try to create account
             let authResult = try await Auth.auth().createUser(withEmail: username, password: password)
             
             print("Account created successfully")
             
-            return (authResult.user, nil)
+            return await UserApi.shared.createUser(name: name, role: role, major: major, student_id: student_id, department: department)
         } catch {
             print("Account creation failed: \(error.localizedDescription)")
             

@@ -4,8 +4,11 @@ import FirebaseAuth
 struct CreateAccountView: View {
     @State private var username = ""
     @State private var password = ""
+    @State private var name = ""
+    @State private var studentId = "" // Added for student_id
     @State private var errorMessage: String?
-    @Environment(\.presentationMode) var presentationMode
+    @State private var accountCreated = false
+    @ObservedObject var viewModel = CreateAccountViewModel()
 
     var body: some View {
         NavigationView {
@@ -15,6 +18,14 @@ struct CreateAccountView: View {
                     .padding()
                 
                 SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                TextField("Name", text: $name) // TextField for name
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                
+                TextField("Student ID", text: $studentId) // TextField for student_id
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                 
@@ -39,20 +50,16 @@ struct CreateAccountView: View {
     }
     
     private func createAccount() async {
-        let (user, error) = await AuthApi.shared.createAccount(username: username, password: password)
-        if let error = error {
-            // Show error message
-            errorMessage = error
-        } else if user != nil {
-            // Account creation was successful
-            print("Account created for: \(username)")
-            presentationMode.wrappedValue.dismiss()
+        await viewModel.createAccount(username: username, password: password, name: name, student_id: studentId) { user, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    // Show error message
+                    self.errorMessage = error
+                } else if user != nil {
+                    // Account creation was successful
+                    self.accountCreated = true
+                }
+            }
         }
-    }
-}
-
-struct CreateAccountView_Previews: PreviewProvider {
-    static var previews: some View {
-        CreateAccountView()
     }
 }

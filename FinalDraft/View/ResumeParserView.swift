@@ -12,20 +12,45 @@ struct ResumeParserView: View {
     @State private var coursework: String = ""
     @State private var document: PDFDocument? = nil
     @State private var isPickerPresented: Bool = false
+    // Loading state for each section
+    @State private var isLoadingExperience = false
+    @State private var isLoadingEducation = false
+    @State private var isLoadingSkills = false
+    @State private var isLoadingCoursework = false
 
     var body: some View {
         VStack {
-            Text("Experience: \(experience)")
-            Text("Education: \(education)")
-            Text("Skills: \(skills)")
-            Text("Coursework: \(coursework)")
+            if isLoadingExperience {
+                ProgressView("Loading Experience...")
+            } else {
+                Text("Experience: \(experience)")
+            }
+            
+            if isLoadingEducation {
+                ProgressView("Loading Education...")
+            } else {
+                Text("Education: \(education)")
+            }
+            
+            if isLoadingSkills {
+                ProgressView("Loading Skills...")
+            } else {
+                Text("Skills: \(skills)")
+            }
+            
+            if isLoadingCoursework {
+                ProgressView("Loading Coursework...")
+            } else {
+                Text("Coursework: \(coursework)")
+            }
+            
             Button(action: {
                 self.isPickerPresented = true
             }) {
                 Text("Upload PDF")
             }
             .sheet(isPresented: $isPickerPresented) {
-                DocumentPicker(document: $document, text: $text, experience: $experience, education: $education, skills: $skills, coursework: $coursework)
+                DocumentPicker(document: $document, text: $text, experience: $experience, education: $education, skills: $skills, coursework: $coursework, isLoadingExperience: $isLoadingExperience, isLoadingEducation: $isLoadingEducation, isLoadingSkills: $isLoadingSkills, isLoadingCoursework: $isLoadingCoursework)
             }
         }
     }
@@ -38,6 +63,11 @@ struct DocumentPicker: UIViewControllerRepresentable {
     @Binding var education: String
     @Binding var skills: String
     @Binding var coursework: String
+    // Bindings for loading states
+    @Binding var isLoadingExperience: Bool
+    @Binding var isLoadingEducation: Bool
+    @Binding var isLoadingSkills: Bool
+    @Binding var isLoadingCoursework: Bool
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -63,10 +93,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
             parent.document = PDFDocument(url: url)
             parent.text = extractTextFromPDF(document: parent.document)
             Task {
-                parent.experience = await extractExperience()
-                parent.education = await extractEducation()
-                parent.skills = await extractSkills()
-                parent.coursework = await extractCoursework()
+                await self.extractAll()
             }
         }
 
@@ -80,6 +107,24 @@ struct DocumentPicker: UIViewControllerRepresentable {
                 text += pageText
             }
             return text
+        }
+        
+        func extractAll() async {
+            parent.isLoadingExperience = true
+            parent.experience = await extractExperience()
+            parent.isLoadingExperience = false
+            
+            parent.isLoadingEducation = true
+            parent.education = await extractEducation()
+            parent.isLoadingEducation = false
+            
+            parent.isLoadingSkills = true
+            parent.skills = await extractSkills()
+            parent.isLoadingSkills = false
+            
+            parent.isLoadingCoursework = true
+            parent.coursework = await extractCoursework()
+            parent.isLoadingCoursework = false
         }
         
         func extractExperience() async -> String {
@@ -145,5 +190,11 @@ struct DocumentPicker: UIViewControllerRepresentable {
             }
             return ""
         }
+    }
+}
+
+struct ResumeParser_Previews: PreviewProvider {
+    static var previews: some View {
+        ResumeParserView()
     }
 }
