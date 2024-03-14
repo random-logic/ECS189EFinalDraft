@@ -1,47 +1,55 @@
 import SwiftUI
 
-// Create a View to display the login UI
 struct LoginView: View {
-    @State var username: String
-    @State var password: String
+    @State var username: String = ""
+    @State var password: String = ""
     @State var error: String?
+    @State private var isAuthenticated = false // State to control navigation
+    
     @ObservedObject var loginViewModel: LoginViewModel
     
     var body: some View {
-        VStack {
-            TextField("Email", text: $username)
-                .padding()
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            SecureField("Password", text: $password)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            if let error = self.error {
-                Text(error)
-                    .foregroundColor(.red)
-            }
-            
-            Button(action: {
-                loginViewModel.login(username: username, password: password) { user, error in
-                    self.error = error
+        NavigationView {
+            VStack {
+                TextField("Email", text: $username)
+                    .padding()
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                SecureField("Password", text: $password)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                if let error = self.error {
+                    Text(error)
+                        .foregroundColor(.red)
                 }
-            }) {
-                Text("Login")
+                
+                Button(action: {
+                    loginViewModel.login(username: username, password: password) { user, error in
+                        if user != nil {
+                            self.isAuthenticated = true
+                        } else {
+                            self.error = error
+                        }
+                    }
+                }) {
+                    Text("Login")
+                }
+                .padding()
+                
+                // Hidden NavigationLink that will activate upon successful login
+                NavigationLink(destination: StudentView(), isActive: $isAuthenticated) {
+                    EmptyView()
+                }
+                
+                Spacer()
             }
             .padding()
-            
-            Spacer()
+            .navigationBarTitle("Login")
         }
-        .padding()
-        .navigationBarTitle("Login")
     }
 }
 
-#Preview {
-    LoginView(username: "user",
-              password: "1234",
-              loginViewModel: LoginViewModel())
-}
+// Assume LoginViewModel is defined elsewhere in your project

@@ -16,7 +16,7 @@ struct ProjectApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TestView()
+            LaunchView()
         }
     }
 }
