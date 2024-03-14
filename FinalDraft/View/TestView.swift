@@ -24,6 +24,10 @@ struct TestView: View {
                     Text("Research Post View")
                 }
                 .padding()
+                NavigationLink(destination: OcrView()) {
+                    Text("Try out the ocr")
+                }
+                .padding()
                 
                 Button(action: {
                     self.createResearchPostViewModel.create(title: "Test Title", description: "Test Desc", majors: ["CS", "CSE"], callback: { err in
@@ -33,13 +37,14 @@ struct TestView: View {
                     Text("Create Research Post")
                 }
                 .padding()
-                
+
                 Button(action: {
                     self.error = self.logoutViewModel.logout()
                 }) {
                     Text("Logout")
                 }
                 .padding()
+                
                 
                 if let error = self.error {
                     Text(error)
