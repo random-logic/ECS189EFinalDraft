@@ -169,3 +169,6 @@ struct RecommendedProjectsView: View {
     }
 }
 
+#Preview {
+    RecommendedProjectsView()
+}

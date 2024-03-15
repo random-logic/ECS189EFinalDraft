@@ -127,3 +127,6 @@ struct AppliedJobsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
+#Preview {
+    AppliedJobsView()
+}

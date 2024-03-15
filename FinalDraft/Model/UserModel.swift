@@ -11,6 +11,12 @@ struct UserModel : DictionaryConvertible {
     var saved: [String]
     var postings: [String]
     
+    var aboutMe: String?
+    var experience: Any
+    var education: Any
+    var skills: [String]
+    var courses: [String]
+    
     // Convenience initializer to parse data from Firestore document
     init?(documentId: String, documentData: [String: Any]) {
         self.id = documentId
@@ -22,6 +28,12 @@ struct UserModel : DictionaryConvertible {
         
         self.name = name
         self.role = role
+        self.experience = documentData["experience"] as Any
+        self.education = documentData["education"] as Any
+        
+        self.aboutMe = documentData["aboutMe"] as? String
+        self.skills = (documentData["skills"] as? NSArray)?.compactMap({ $0 as? String }) ?? []
+        self.courses = (documentData["courses"] as? NSArray)?.compactMap({ $0 as? String }) ?? []
         
         if role == "student" {
             guard let student_id = documentData["student_id"] as? String else {
