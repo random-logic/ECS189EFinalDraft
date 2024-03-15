@@ -99,6 +99,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
             Task {
                 await self.extractAll()
             }
+            fillAll()
         }
 
         func extractTextFromPDF(document: PDFDocument?) -> String {
@@ -129,6 +130,11 @@ struct DocumentPicker: UIViewControllerRepresentable {
             parent.isLoadingCoursework = true
             parent.coursework = await extractCoursework()
             parent.isLoadingCoursework = false
+        }
+        
+        func fillAll() {
+            fillSkills()
+            fillCoursework()
         }
         
         func extractExperience() async -> String {
@@ -176,13 +182,12 @@ struct DocumentPicker: UIViewControllerRepresentable {
             } catch {
                 print("Error: \(error)")
             }
-            fillSkills()
             return ""
         }
         
         func fillSkills() {
-            let skillsString = "Microsoft Excel; HTML; CSS; Microsoft Word"
-            let newSkills = skillsString.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
+            parent.skills = "Microsoft Excel; HTML; CSS; Microsoft Word" // Remove this line once I figure out why parent.skills is always empty when fillSkills() starts running even after extractSkills() is finished running
+            let newSkills = parent.skills.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
             parent.user?.skills.append(contentsOf: newSkills)
             for skill in parent.user?.skills ?? [] {
                 print("Skill: \(skill)")
@@ -206,11 +211,11 @@ struct DocumentPicker: UIViewControllerRepresentable {
         }
         
         func fillCoursework() {
-            let skillsString = "Microsoft Excel; HTML; CSS; Microsoft Word"
-            let newSkills = skillsString.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
-            parent.user?.skills.append(contentsOf: newSkills)
-            for skill in parent.user?.skills ?? [] {
-                print("Skill: \(skill)")
+            parent.coursework = "Introduction to C++; Operating Systems; Web Development; Classical Physics" // Remove this line once I figure out why parent.coursework is always empty when fillCoursework() starts running even after extractCoursework() is finished running
+            let newCoursework = parent.coursework.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
+            parent.user?.courses.append(contentsOf: newCoursework)
+            for course in parent.user?.courses ?? [] {
+                print("Course: \(course)")
             }
         }
     }
