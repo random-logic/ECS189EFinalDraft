@@ -20,6 +20,7 @@ struct NavigationMenuView: View {
     let subtitleColor: Color = Color(red: 58/255, green: 58/255, blue: 62/255)
     let bodyColor: Color = Color(red: 129/255, green: 136/255, blue: 152/255)
     
+    @State var user: UserModel
     @State private var navigateToStudentView = false
     @State private var navigateToRecommendedProjectsView = false
     @State private var navigateToAppliedProjectsView = false
@@ -41,7 +42,7 @@ struct NavigationMenuView: View {
                 .frame(maxWidth: .infinity)
             }
             .navigationDestination(isPresented: $navigateToStudentView) {
-                StudentView()
+                //StudentView()
             }
             
             Button(action: {
@@ -58,7 +59,7 @@ struct NavigationMenuView: View {
                 .frame(maxWidth: .infinity)
             }
             .navigationDestination(isPresented: $navigateToRecommendedProjectsView) {
-                //StudentView()
+                StudentView(user: user)
             }
             
             Button(action: {
@@ -93,6 +94,20 @@ struct NavigationMenuView: View {
             }
             .navigationDestination(isPresented: $navigateToOCRView) {
                 //StudentView()
+            }
+        }
+        .onAppear {
+            Task {
+                let (userModel, err) = await UserApi.shared.readUser(uid: AuthApi.shared.getUid() ?? "")
+                
+                await MainActor.run {
+                    if let err = err {
+                        print(err)
+                    }
+                    else if let user = userModel {
+                        self.user = user
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: 50)

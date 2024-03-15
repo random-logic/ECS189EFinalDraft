@@ -17,6 +17,8 @@ struct StudentView: View {
     let skillsArray = ["HTML", "CSS", "JavaScript", "React.js", "MongoDB", "Swift", "Angular.js", "Python"]
     let coursesArray = ["Data Structures and Algorithms", "Operating Systems", "Artificial Intelligence", "Computer Vision", "iOS App Development"]
     
+    @State var user: UserModel? = nil
+    
     @State private var navigateToEditNameAndPictureView = false
     @State private var navigateToEditAboutMeView = false
     @State private var navigateToEditExperienceItemView = false
@@ -32,7 +34,7 @@ struct StudentView: View {
                         .font(.system(size: 90))
                     
                     HStack(spacing: 3) {
-                        Text("Jane Doe")
+                        Text(user?.aboutMe ?? "nil")
                             .font(.custom(titleFontName, size: titleFontSize))
                             .foregroundStyle(titleColor)
                         
@@ -48,7 +50,7 @@ struct StudentView: View {
                             EditNameAndPictureView()
                         }
                     }
-                    ResumeParserView()
+                    ResumeParserView(user: $user)
                     CoverLetterGeneratorView()
                 }
                 
@@ -72,9 +74,10 @@ struct StudentView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")
+                    Text(user?.aboutMe ?? "nil")
                         .font(.custom(bodyFontName, size: bodyFontSize))
                         .foregroundStyle(bodyColor)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
                 VStack(spacing: 3) {
@@ -174,7 +177,7 @@ struct StudentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     WrappingHStack(id: \.self, alignment: .leading, horizontalSpacing: 5, verticalSpacing: 5) {
-                        ForEach(skillsArray, id: \.self) { skill in
+                        ForEach(user?.skills ?? [], id: \.self) { skill in
                             Text(skill)
                                 .font(.custom(bodyFontName, size: bodyFontSize))
                                 .padding(.vertical, 2)
@@ -206,7 +209,7 @@ struct StudentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
                     WrappingHStack(id: \.self, alignment: .leading, horizontalSpacing: 5, verticalSpacing: 5) {
-                        ForEach(coursesArray, id: \.self) { course in
+                        ForEach(user?.courses ?? [], id: \.self) { course in
                             Text(course)
                                 .font(.custom(bodyFontName, size: bodyFontSize))
                                 .padding(.vertical, 2)
@@ -218,6 +221,21 @@ struct StudentView: View {
                     }
                 }
             }
+            .onAppear {
+                Task {
+                    let (userModel, err) = await UserApi.shared.readUser(uid: AuthApi.shared.getUid() ?? "")
+                    
+                    await MainActor.run {
+                        if let err = err {
+                            print(err)
+                        }
+                        else if let user = userModel {
+                            self.user = user
+                        }
+                    }
+                }
+            }
+
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(30)
         }

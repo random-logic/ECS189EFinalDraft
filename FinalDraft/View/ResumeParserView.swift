@@ -12,12 +12,15 @@ struct ResumeParserView: View {
     @State private var coursework: String = ""
     @State private var document: PDFDocument? = nil
     @State private var isPickerPresented: Bool = false
+    
     // Loading state for each section
     @State private var isLoadingExperience = false
     @State private var isLoadingEducation = false
     @State private var isLoadingSkills = false
     @State private var isLoadingCoursework = false
-
+    
+    @Binding var user: UserModel?
+    
     var body: some View {
         VStack {
             if isLoadingExperience {
@@ -50,7 +53,7 @@ struct ResumeParserView: View {
                 Text("Upload PDF")
             }
             .sheet(isPresented: $isPickerPresented) {
-                DocumentPicker(document: $document, text: $text, experience: $experience, education: $education, skills: $skills, coursework: $coursework, isLoadingExperience: $isLoadingExperience, isLoadingEducation: $isLoadingEducation, isLoadingSkills: $isLoadingSkills, isLoadingCoursework: $isLoadingCoursework)
+                DocumentPicker(document: $document, text: $text, experience: $experience, education: $education, skills: $skills, coursework: $coursework, user: $user, isLoadingExperience: $isLoadingExperience, isLoadingEducation: $isLoadingEducation, isLoadingSkills: $isLoadingSkills, isLoadingCoursework: $isLoadingCoursework)
             }
         }
     }
@@ -63,6 +66,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
     @Binding var education: String
     @Binding var skills: String
     @Binding var coursework: String
+    @Binding var user: UserModel?
     // Bindings for loading states
     @Binding var isLoadingExperience: Bool
     @Binding var isLoadingEducation: Bool
@@ -131,7 +135,7 @@ struct DocumentPicker: UIViewControllerRepresentable {
             let apiKey = "AIzaSyA7KtP-leaQgC2MU_4TCSjLELXSRvRjTyQ"
             let model = GenerativeModel(name: "gemini-pro", apiKey: apiKey)
 
-            let prompt = "Given the following resume, write a list of all the experience items in it. Separate the job title, company, description, start date, and end date with a semicolon. Any fields that don't exist should be an empty string. Separate each experience item with a caret. For example, your response should look like this: Software Engineer; Google; Worked on Google Cloud team; Aug 2011; Jun 2015^Software Engineer Intern; Amazon; Worked on AWS team; Aug 2008; Jun 2009^ [START RESUME] \(parent.text)"
+            let prompt = "Given the following resume, write a list of all the experience items in it. Separate the job title, company, description, start date, and end date with a semicolon (DO NOT put a caret or semicolon after the last experience item). Any fields that don't exist should be an empty string. Separate each experience item with a caret. For example, your response should look like this: Software Engineer; Google; Worked on Google Cloud team; Aug 2011; Jun 2015^Software Engineer Intern; Amazon; Worked on AWS team; Aug 2008; Jun 2009^ [START RESUME] \(parent.text)"
             do {
                 let response = try await model.generateContent(prompt)
                 if let responseText = response.text {
@@ -172,7 +176,17 @@ struct DocumentPicker: UIViewControllerRepresentable {
             } catch {
                 print("Error: \(error)")
             }
+            fillSkills()
             return ""
+        }
+        
+        func fillSkills() {
+            let skillsString = "Microsoft Excel; HTML; CSS; Microsoft Word"
+            let newSkills = skillsString.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
+            parent.user?.skills.append(contentsOf: newSkills)
+            for skill in parent.user?.skills ?? [] {
+                print("Skill: \(skill)")
+            }
         }
         
         func extractCoursework() async -> String {
@@ -190,11 +204,14 @@ struct DocumentPicker: UIViewControllerRepresentable {
             }
             return ""
         }
-    }
-}
-
-struct ResumeParser_Previews: PreviewProvider {
-    static var previews: some View {
-        ResumeParserView()
+        
+        func fillCoursework() {
+            let skillsString = "Microsoft Excel; HTML; CSS; Microsoft Word"
+            let newSkills = skillsString.split(separator: ";").map { String($0.trimmingCharacters(in: .whitespaces)) }
+            parent.user?.skills.append(contentsOf: newSkills)
+            for skill in parent.user?.skills ?? [] {
+                print("Skill: \(skill)")
+            }
+        }
     }
 }
