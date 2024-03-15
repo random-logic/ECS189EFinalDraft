@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 
 struct ResumeParserView: View {
     @State private var text: String = ""
+    @State private var name: String = ""
     @State private var experience: String = ""
     @State private var education: String = ""
     @State private var skills: String = ""
@@ -14,6 +15,7 @@ struct ResumeParserView: View {
     @State private var isPickerPresented: Bool = false
     
     // Loading state for each section
+    @State private var isLoadingName = false
     @State private var isLoadingExperience = false
     @State private var isLoadingEducation = false
     @State private var isLoadingSkills = false
@@ -23,6 +25,12 @@ struct ResumeParserView: View {
     
     var body: some View {
         VStack {
+            if isLoadingName {
+                ProgressView("Loading Name...")
+            } else {
+                Text("Name: \(name)")
+            }
+            
             if isLoadingExperience {
                 ProgressView("Loading Experience...")
             } else {
@@ -53,7 +61,7 @@ struct ResumeParserView: View {
                 Text("Upload PDF")
             }
             .sheet(isPresented: $isPickerPresented) {
-                DocumentPicker(document: $document, text: $text, experience: $experience, education: $education, skills: $skills, coursework: $coursework, user: $user, isLoadingExperience: $isLoadingExperience, isLoadingEducation: $isLoadingEducation, isLoadingSkills: $isLoadingSkills, isLoadingCoursework: $isLoadingCoursework)
+                DocumentPicker(document: $document, text: $text, name: $name, experience: $experience, education: $education, skills: $skills, coursework: $coursework, user: $user, isLoadingName: $isLoadingName, isLoadingExperience: $isLoadingExperience, isLoadingEducation: $isLoadingEducation, isLoadingSkills: $isLoadingSkills, isLoadingCoursework: $isLoadingCoursework)
             }
         }
     }
@@ -62,12 +70,14 @@ struct ResumeParserView: View {
 struct DocumentPicker: UIViewControllerRepresentable {
     @Binding var document: PDFDocument?
     @Binding var text: String
+    @Binding var name: String
     @Binding var experience: String
     @Binding var education: String
     @Binding var skills: String
     @Binding var coursework: String
     @Binding var user: UserModel?
     // Bindings for loading states
+    @Binding var isLoadingName: Bool
     @Binding var isLoadingExperience: Bool
     @Binding var isLoadingEducation: Bool
     @Binding var isLoadingSkills: Bool
@@ -115,6 +125,10 @@ struct DocumentPicker: UIViewControllerRepresentable {
         }
         
         func extractAll() async {
+            parent.isLoadingName = true
+            parent.name = await extractName()
+            parent.isLoadingName = false
+            
             parent.isLoadingExperience = true
             parent.experience = await extractExperience()
             parent.isLoadingExperience = false
@@ -133,8 +147,30 @@ struct DocumentPicker: UIViewControllerRepresentable {
         }
         
         func fillAll() {
+            fillName()
             fillSkills()
             fillCoursework()
+        }
+        
+        func extractName() async -> String {
+            let apiKey = "AIzaSyA7KtP-leaQgC2MU_4TCSjLELXSRvRjTyQ"
+            let model = GenerativeModel(name: "gemini-pro", apiKey: apiKey)
+
+            let prompt = "Given the following resume, get the full name but do not include the middle name if there is one (e.g. Jane Doe) [START RESUME] \(parent.text)"
+            do {
+                let response = try await model.generateContent(prompt)
+                if let responseText = response.text {
+                    return responseText
+                }
+            } catch {
+                print("Error: \(error)")
+            }
+            return ""
+        }
+        
+        func fillName() {
+            parent.name = "Tyler Tran" // Remove this line once I figure out why parent.name is always empty when fillName() starts running even after extractName() is finished running
+            parent.user?.name = parent.name // Fix parent.user?.name not getting updated
         }
         
         func extractExperience() async -> String {
