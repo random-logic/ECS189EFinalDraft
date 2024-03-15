@@ -6,7 +6,7 @@ struct DataScanner: UIViewControllerRepresentable {
     
     @Binding var startScanning: Bool
     @Binding var scanText: String
-    
+        
     func makeUIViewController(context: Context) -> DataScannerViewController {
         let controller = DataScannerViewController(
                             recognizedDataTypes: [.text()],
@@ -31,7 +31,6 @@ struct DataScanner: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    
     class Coordinator: NSObject, DataScannerViewControllerDelegate {
         var parent: DataScanner
         
@@ -43,9 +42,12 @@ struct DataScanner: UIViewControllerRepresentable {
             switch item {
             case .text(let text):
                 parent.scanText = text.transcript
+                print(text.transcript)
             default: break
             }
         }
         
     }
 }
+
+

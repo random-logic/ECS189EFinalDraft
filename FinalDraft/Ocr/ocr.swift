@@ -4,70 +4,84 @@ import VisionKit
 struct OcrView: View {
     @State private var startScanning = false
     @State private var scanText = ""
-    //    @State private var showSignInPage = false // To show the fallback option
     @State private var useDataScanner = false
+    @State private var navigateToProfessorView = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            DataScanner(startScanning: $startScanning, scanText: $scanText)
-                .frame(height: 400)
-         
-            Text(scanText)
-                .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
-                .background(in: Rectangle())
-                .backgroundStyle(Color(uiColor: .systemGray6))
-         
+        NavigationStack {
+            VStack(spacing: 0) {
+                DataScanner(startScanning: $startScanning, scanText: $scanText)
+                    .frame(height: 400)
+                
+                Text(scanText)
+                    .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
+                    .background(in: Rectangle())
+                    .backgroundStyle(Color(uiColor: .systemGray6))
+                
+            }
+            
+            NavigationLink(destination: ProfessorView(), isActive: $navigateToProfessorView) {
+                EmptyView()
+            }
+            .onChange(of: scanText) { newValue in
+                if !newValue.isEmpty {
+                    navigateToProfessorView = true // Trigger navigation
+                }
+            }
+            .task {
+                if DataScannerViewController.isSupported && DataScannerViewController.isAvailable {
+                    startScanning.toggle()
+                }
+            }
+            TabBar()
         }
-        .task {
-            if DataScannerViewController.isSupported && DataScannerViewController.isAvailable {
-                startScanning.toggle()
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
+    }
+}
+
+
+struct ProfessorView: View {
+    @State private var navigateToResearchView = false
+
+    var body: some View {
+        NavigationView { // Ensure there is a NavigationView
+            VStack {
+                Image("Sam King Pic")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 400, height: 150)
+
+                Text("Professor Sam King")
+                    .font(.system(size: 18, weight: .bold, design: .serif))
+                    .fontWeight(.heavy)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.orange)
+                    .padding()
+                Text("My research focus is on technology to manage Type 1 Diabetes...")
+                    .font(.system(size: 18, weight: .thin, design: .serif))
+                    .fontWeight(.heavy)
+                    .multilineTextAlignment(.leading)
+                    .foregroundColor(.black)
+                    .padding()
+
+                Button("Available Research Positions!") {
+                    navigateToResearchView = true
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding()
+                .frame(width: 300, height: 60)
+                .background(Color.indigo)
+                .cornerRadius(15.0)
+
+                NavigationLink("", destination: SamKingView(), isActive: $navigateToResearchView)
             }
         }
     }
 }
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+
+
+#Preview {
+    OcrView()
 }
-//VStack {
-//    if useDataScanner {
-//        DataScanner(startScanning: $startScanning, scanText: $scanText)
-//            .frame(height: 400)
-//
-//        Text(scanText)
-//            .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
-//            .background(in: Rectangle())
-//            .backgroundStyle(Color(uiColor: .systemGray6))
-//    } else {
-//        // Fallback to manual image selection and OCR
-//        Button("Select Image for OCR") {
-//            showSignInPage = true
-//        }
-//        .sheet(isPresented: $showSignInPage) {
-//            alt_ocr()
-//        }
-//    }
-//}
-//.task {
-//    checkDataScannerSupport()
-//    startScanning = useDataScanner
-//}
-//Button("Not working? Try it out manually!") {
-//    showSignInPage = true
-//}
-//.sheet(isPresented: $showSignInPage) {
-//    alt_ocr()
-//}
-//}
-//
-//@MainActor private func checkDataScannerSupport() {
-//startScanning = DataScannerViewController.isSupported && DataScannerViewController.isAvailable
-//}
-//}
-//
-//struct ContentView_Previews: PreviewProvider {
-//static var previews: some View {
-//OcrView()
-//}
-//}

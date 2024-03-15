@@ -9,7 +9,6 @@ struct LoginView: View {
     @ObservedObject var loginViewModel: LoginViewModel
     
     var body: some View {
-        NavigationView {
             VStack {
                 TextField("Email", text: $username)
                     .padding()
@@ -40,7 +39,7 @@ struct LoginView: View {
                 .padding()
                 
                 // Hidden NavigationLink that will activate upon successful login
-                NavigationLink(destination: StudentView(), isActive: $isAuthenticated) {
+                NavigationLink(destination: ContentViewDemo(), isActive: $isAuthenticated) {
                     EmptyView()
                 }
                 
@@ -48,7 +47,6 @@ struct LoginView: View {
             }
             .padding()
             .navigationBarTitle("Login")
-        }
     }
 }
 

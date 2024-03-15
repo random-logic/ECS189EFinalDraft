@@ -32,7 +32,7 @@ struct StudentView: View {
                         .font(.system(size: 90))
                     
                     HStack(spacing: 3) {
-                        Text("Jane Doe")
+                        Text("Andrew Jowe")
                             .font(.custom(titleFontName, size: titleFontSize))
                             .foregroundStyle(titleColor)
                         
@@ -48,8 +48,6 @@ struct StudentView: View {
                             EditNameAndPictureView()
                         }
                     }
-                    ResumeParserView()
-                    CoverLetterGeneratorView()
                 }
                 
                 VStack(spacing: 3) {
@@ -221,5 +219,10 @@ struct StudentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(30)
         }
+    }
+}
+struct StudentView_Preview: PreviewProvider {
+    static var previews: some View {
+        StudentView()
     }
 }

@@ -128,6 +128,15 @@ struct RecommendedProjectsViewDemo: View {
                     
                     HStack(spacing: 30) {
                         Button(action: {
+                            print("Left chevron tapped!")
+                        }) {
+                            Image(systemName: "chevron.backward")
+                                .font(.custom(subtitleFontName, size: subtitleFontSize))
+                                .fontWeight(.bold)
+                                .foregroundStyle(titleColor)
+                        }
+                        
+                        Button(action: {
                             print("Apply button tapped!")
                             navigateToApplicationView = true
                         }) {
@@ -143,7 +152,14 @@ struct RecommendedProjectsViewDemo: View {
                             AppliedScreen()
                         }
                         
-                        
+                        Button(action: {
+                            print("Right chevron tapped!")
+                        }) {
+                            Image(systemName: "chevron.forward")
+                                .font(.custom(subtitleFontName, size: subtitleFontSize))
+                                .fontWeight(.bold)
+                                .foregroundStyle(titleColor)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
